@@ -19,10 +19,10 @@ class AppTheme {
       brightness: Brightness.light,
     ),
     scaffoldBackgroundColor: const Color(0xFFF5F7FA),
-    cardTheme: CardTheme(
+    cardTheme: const CardThemeData(
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.all(Radius.elliptical(16, 16)),
       ),
     ),
     appBarTheme: const AppBarTheme(
@@ -36,19 +36,18 @@ class AppTheme {
     colorScheme: ColorScheme.fromSeed(
       seedColor: primary,
       brightness: Brightness.dark,
-      background: background,
       surface: surface,
     ),
     scaffoldBackgroundColor: background,
     cardColor: cardColor,
-    cardTheme: CardTheme(
+    cardTheme: const CardThemeData(
       color: cardColor,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.all(Radius.elliptical(16, 16)),
       ),
     ),
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       backgroundColor: background,
       elevation: 0,
       centerTitle: false,

@@ -29,7 +29,7 @@ class DashboardPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.favorite,
               size: 80,
               color: AppTheme.heartRate,
