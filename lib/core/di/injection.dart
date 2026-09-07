@@ -1,8 +1,8 @@
 import 'package:get_it/get_it.dart';
+import 'package:injectable/injectable.dart';
+import 'injection.config.dart';
 
 final GetIt getIt = GetIt.instance;
 
-void configureDependencies() {
-  // Will be populated as we build features
-  // Day 2 onwards — BLE, repositories, use cases
-}
+@InjectableInit()
+void configureDependencies() => getIt.init();

@@ -51,7 +51,7 @@ class DashboardPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 32),
-            Text(
+            const Text(
               'BLE Scanner coming Day 2',
               style: TextStyle(
                 fontSize: 14,
