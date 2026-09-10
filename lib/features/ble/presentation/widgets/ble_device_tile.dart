@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/ble_device.dart';
+import '../pages/device_detail_page.dart';
 
 class BleDeviceTile extends StatelessWidget {
   final BleDevice device;
-  final VoidCallback? onTap;
 
   const BleDeviceTile({
     super.key,
     required this.device,
-    this.onTap,
   });
 
   Color get _rssiColor {
@@ -96,7 +95,14 @@ class BleDeviceTile extends StatelessWidget {
             ),
           ],
         ),
-        onTap: onTap,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => DeviceDetailPage(device: device),
+            ),
+          );
+        },
       ),
     );
   }
