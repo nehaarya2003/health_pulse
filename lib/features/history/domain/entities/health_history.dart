@@ -30,3 +30,15 @@ class HealthHistory extends Equatable {
   List<Object?> get props => [type, readings];
 }
 
+class HealthReading extends Equatable {
+final DateTime timestamp;
+final double value;
+
+const HealthReading({
+required this.timestamp,
+required this.value,
+});
+
+@override
+List<Object?> get props => [timestamp, value];
+}
