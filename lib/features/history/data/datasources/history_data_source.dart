@@ -31,3 +31,26 @@ class HistoryDataSource {
     ];
   }
 
+  HealthHistory _generateMetricHistory(
+      MetricType type, {
+        required double baseValue,
+        required double variance,
+      }) {
+    final readings = <HealthReading>[];
+    final now = DateTime.now();
+
+    // Generate one reading per day for 7 days
+    for (int i = 6; i >= 0; i--) {
+      final date = now.subtract(Duration(days: i));
+      final value = baseValue +
+          (variance * (_random.nextDouble() * 2 - 1));
+
+      readings.add(HealthReading(
+        timestamp: date,
+        value: double.parse(value.toStringAsFixed(1)),
+      ));
+    }
+
+    return HealthHistory(type: type, readings: readings);
+  }
+}
