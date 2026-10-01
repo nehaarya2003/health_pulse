@@ -1,6 +1,6 @@
 import 'dart:math';
+import '../../../ble/domain/entities/health_metric.dart';
 import '../../domain/entities/health_history.dart';
-import '../../../dashboard/domain/entities/health_metric.dart';
 
 class HistoryDataSource {
   final Random _random = Random();

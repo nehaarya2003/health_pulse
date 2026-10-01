@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
-import '../../dashboard/domain/entities/health_metric.dart';
+
+import '../../../ble/domain/entities/health_metric.dart';
 
 class HealthHistory extends Equatable {
   final MetricType type;

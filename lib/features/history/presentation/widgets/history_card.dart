@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../ble/domain/entities/health_metric.dart';
 import '../../domain/entities/health_history.dart';
-import '../../../dashboard/domain/entities/health_metric.dart';
 import 'health_chart.dart';
 
 class HistoryCard extends StatelessWidget {

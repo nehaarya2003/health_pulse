@@ -2,7 +2,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/health_history.dart';
-import '../../../dashboard/domain/entities/health_metric.dart';
 
 class HealthChart extends StatefulWidget {
   final HealthHistory history;
@@ -125,8 +124,7 @@ class _HealthChartState extends State<HealthChart>
             ),
             lineTouchData: LineTouchData(
               touchTooltipData: LineTouchTooltipData(
-                getTooltipColor: (spot) =>
-                    widget.color.withOpacity(0.8),
+                tooltipBgColor: widget.color.withValues(alpha: 0.8),
                 getTooltipItems: (spots) {
                   return spots.map((spot) {
                     return LineTooltipItem(

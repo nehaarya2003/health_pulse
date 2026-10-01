@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../domain/entities/ble_device.dart';
-import '../../domain/repositories/ble_repository.dart';
 import '../../domain/usecases/scan_devices_usecase.dart';
 import '../../data/datasources/ble_data_source.dart';
 import '../../data/repositories/ble_repository_impl.dart';
