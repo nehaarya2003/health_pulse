@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../../../../core/di/bloc_factory.dart';
 import '../../domain/entities/ble_device.dart';
-import '../../domain/usecases/scan_devices_usecase.dart';
-import '../../data/datasources/ble_data_source.dart';
-import '../../data/repositories/ble_repository_impl.dart';
 import '../bloc/ble_scanner_bloc.dart';
 import '../bloc/ble_scanner_event.dart';
 import '../bloc/ble_scanner_state.dart';
@@ -16,11 +14,7 @@ class BleScannerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => BleScannerBloc(
-        scanDevicesUseCase: ScanDevicesUseCase(
-          BleRepositoryImpl(BleDataSource()),
-        ),
-      ),
+      create: (_) => BlocFactory.createBleScannerBloc(),
       child: const _BleScannerView(),
     );
   }
@@ -62,13 +56,9 @@ class _BleScannerViewState extends State<_BleScannerView> {
               return TextButton.icon(
                 onPressed: () {
                   if (isScanning) {
-                    context
-                        .read<BleScannerBloc>()
-                        .add(StopScanEvent());
+                    context.read<BleScannerBloc>().add(StopScanEvent());
                   } else {
-                    context
-                        .read<BleScannerBloc>()
-                        .add(StartScanEvent());
+                    context.read<BleScannerBloc>().add(StartScanEvent());
                   }
                 },
                 icon: Icon(
@@ -98,16 +88,10 @@ class _BleScannerViewState extends State<_BleScannerView> {
             return _buildErrorView(state.message);
           }
           if (state is BleScannerScanning) {
-            return _buildDeviceList(
-              state.devices,
-              isScanning: true,
-            );
+            return _buildDeviceList(state.devices, isScanning: true);
           }
           if (state is BleScannerStopped) {
-            return _buildDeviceList(
-              state.devices,
-              isScanning: false,
-            );
+            return _buildDeviceList(state.devices, isScanning: false);
           }
           return const SizedBox();
         },
@@ -120,24 +104,17 @@ class _BleScannerViewState extends State<_BleScannerView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.bluetooth_searching,
-            size: 80,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+          Icon(Icons.bluetooth_searching,
+              size: 80,
+              color: Theme.of(context).colorScheme.primary),
           const SizedBox(height: 24),
-          const Text(
-            'Find nearby BLE devices',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-          ),
+          const Text('Find nearby BLE devices',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
           const SizedBox(height: 8),
-          Text(
-            'Tap Scan to discover devices',
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.secondary,
-            ),
-          ),
+          Text('Tap Scan to discover devices',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: Theme.of(context).colorScheme.secondary)),
           const SizedBox(height: 32),
           FilledButton.icon(
             onPressed: () =>
@@ -170,11 +147,9 @@ class _BleScannerViewState extends State<_BleScannerView> {
         children: [
           const Icon(Icons.error_outline, size: 60, color: Colors.red),
           const SizedBox(height: 16),
-          Text(
-            'Error: $message',
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.red),
-          ),
+          Text('Error: $message',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.red)),
           const SizedBox(height: 16),
           FilledButton(
             onPressed: () =>
@@ -192,13 +167,7 @@ class _BleScannerViewState extends State<_BleScannerView> {
       }) {
     return Column(
       children: [
-        // Scanning indicator
-        if (isScanning)
-          LinearProgressIndicator(
-            backgroundColor: Colors.grey.shade200,
-          ),
-
-        // Device count
+        if (isScanning) const LinearProgressIndicator(),
         Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -206,42 +175,31 @@ class _BleScannerViewState extends State<_BleScannerView> {
               Text(
                 '${devices.length} device${devices.length == 1 ? '' : 's'} found',
                 style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14,
-                ),
+                    fontWeight: FontWeight.w500, fontSize: 14),
               ),
               const Spacer(),
               if (isScanning)
                 const Row(
                   children: [
                     SizedBox(
-                      width: 10,
-                      height: 10,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
+                        width: 10,
+                        height: 10,
+                        child: CircularProgressIndicator(strokeWidth: 2)),
                     SizedBox(width: 6),
-                    Text(
-                      'Scanning...',
-                      style: TextStyle(fontSize: 12),
-                    ),
+                    Text('Scanning...', style: TextStyle(fontSize: 12)),
                   ],
                 ),
             ],
           ),
         ),
-
-        // Device list
         Expanded(
           child: devices.isEmpty
               ? Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.devices,
-                  size: 60,
-                  color: Colors.grey.shade400,
-                ),
+                Icon(Icons.devices,
+                    size: 60, color: Colors.grey.shade400),
                 const SizedBox(height: 16),
                 Text(
                   isScanning
@@ -256,9 +214,8 @@ class _BleScannerViewState extends State<_BleScannerView> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: devices.length,
             separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemBuilder: (context, index) {
-              return BleDeviceTile(device: devices[index]);
-            },
+            itemBuilder: (context, index) =>
+                BleDeviceTile(device: devices[index]),
           ),
         ),
       ],
