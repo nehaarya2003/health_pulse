@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/router/app_router.dart';
 import '../../domain/entities/ble_device.dart';
 import '../pages/device_detail_page.dart';
 
@@ -96,12 +97,7 @@ class BleDeviceTile extends StatelessWidget {
           ],
         ),
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => DeviceDetailPage(device: device),
-            ),
-          );
+       AppRouter.goToDeviceDetail(context, device);
         },
       ),
     );

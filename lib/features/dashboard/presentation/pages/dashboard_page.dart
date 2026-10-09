@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/di/bloc_factory.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../ble/presentation/pages/ble_scanner_page.dart';
-import '../../data/datasources/health_simulator.dart';
-import '../../data/repositories/dashboard_repository_impl.dart';
 import '../../domain/entities/health_metric.dart';
-import '../../domain/usecases/get_health_metrics_usecase.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../bloc/dashboard_event.dart';
 import '../bloc/dashboard_state.dart';
@@ -17,11 +16,8 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => DashboardBloc(
-        getHealthMetricsUseCase: GetHealthMetricsUseCase(
-          DashboardRepositoryImpl(HealthSimulator()),
-        ),
-      )..add(StartMonitoringEvent()),
+        create: (_) => BlocFactory.createDashboardBloc()
+          ..add(StartMonitoringEvent()),
       child: const _DashboardView(),
     );
   }
@@ -74,12 +70,7 @@ class _DashboardView extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.bluetooth_searching),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const BleScannerPage(),
-                ),
-              );
+             AppRouter.goToScanner(context);
             },
           ),
         ],

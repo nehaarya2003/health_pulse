@@ -2,22 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'core/di/injection.dart';
+import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
-import 'features/dashboard/presentation/pages/dashboard_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Lock to portrait
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
-  // Init Hive local storage
+  // Init Hive
   await Hive.initFlutter();
 
-  // Init dependency injection
+  // Init DI
   configureDependencies();
 
   runApp(const HealthPulseApp());
@@ -34,7 +33,8 @@ class HealthPulseApp extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
-      home: const DashboardPage(),
+      onGenerateRoute: AppRouter.onGenerateRoute,
+      initialRoute: AppRouter.dashboard,
     );
   }
 }

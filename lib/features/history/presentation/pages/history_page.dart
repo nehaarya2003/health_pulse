@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/datasources/history_data_source.dart';
-import '../../data/repositories/history_repository_impl.dart';
-import '../../domain/usecases/get_history_usecase.dart';
+import '../../../../core/di/bloc_factory.dart';
 import '../bloc/history_bloc.dart';
 import '../bloc/history_event.dart';
 import '../bloc/history_state.dart';
@@ -14,11 +12,8 @@ class HistoryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => HistoryBloc(
-        getHistoryUseCase: GetHistoryUseCase(
-          HistoryRepositoryImpl(HistoryDataSource()),
-        ),
-      )..add(LoadHistoryEvent()),
+        create: (_) => BlocFactory.createHistoryBloc()
+          ..add(LoadHistoryEvent()),
       child: const _HistoryView(),
     );
   }

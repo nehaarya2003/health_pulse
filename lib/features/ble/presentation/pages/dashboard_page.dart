@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../ble/presentation/pages/ble_scanner_page.dart';
 import '../../../../core/theme/app_theme.dart';
 
@@ -45,12 +46,7 @@ class DashboardPage extends StatelessWidget {
             const SizedBox(height: 32),
             FilledButton.icon(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const BleScannerPage(),
-                  ),
-                );
+               AppRouter.goToScanner(context);
               },
               icon: const Icon(Icons.bluetooth_searching),
               label: const Text('Scan for BLE Devices'),

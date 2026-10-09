@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/di/bloc_factory.dart';
 import '../../domain/entities/ble_device.dart';
 import '../../domain/entities/ble_characteristic.dart';
 import '../../domain/usecases/connect_device_usecase.dart';
@@ -18,15 +19,9 @@ class DeviceDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dataSource = BleDataSource();
-    final repository = BleRepositoryImpl(dataSource);
-
     return BlocProvider(
-      create: (_) => BleConnectionBloc(
-        connectDeviceUseCase: ConnectDeviceUseCase(repository),
-        disconnectDeviceUseCase: DisconnectDeviceUseCase(repository),
-        discoverServicesUseCase: DiscoverServicesUseCase(repository),
-      )..add(ConnectDeviceEvent(device.id)),
+      create: (_) => BlocFactory.createBleConnectionBloc()
+        ..add(ConnectDeviceEvent(device.id)),
       child: _DeviceDetailView(device: device),
     );
   }
@@ -51,8 +46,7 @@ class _DeviceDetailView extends StatelessWidget {
                   onPressed: () => context
                       .read<BleConnectionBloc>()
                       .add(DisconnectDeviceEvent(device.id)),
-                  icon: const Icon(Icons.bluetooth_disabled,
-                      color: Colors.red),
+                  icon: const Icon(Icons.bluetooth_disabled, color: Colors.red),
                   label: const Text('Disconnect',
                       style: TextStyle(color: Colors.red)),
                 );
@@ -72,8 +66,7 @@ class _DeviceDetailView extends StatelessWidget {
             return _buildDiscovering();
           }
           if (state is BleConnectionServicesDiscovered) {
-            return _buildServicesView(
-                state.characteristics);
+            return _buildServicesView(state.characteristics);
           }
           if (state is BleConnectionDisconnected) {
             return _buildDisconnected(context);
@@ -118,8 +111,7 @@ class _DeviceDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildServicesView(
-      List<BleCharacteristic> characteristics) {
+  Widget _buildServicesView(List<BleCharacteristic> characteristics) {
     // Group by service UUID
     final Map<String, List<BleCharacteristic>> grouped = {};
     for (final c in characteristics) {
@@ -132,21 +124,19 @@ class _DeviceDetailView extends StatelessWidget {
         // Connection status card
         Card(
           child: ListTile(
-            leading: const Icon(Icons.bluetooth_connected,
-                color: Colors.green),
+            leading: const Icon(Icons.bluetooth_connected, color: Colors.green),
             title: Text(device.name),
             subtitle: Text(device.id),
             trailing: Container(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: Colors.green.shade100,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Text(
                 'Connected',
-                style: TextStyle(
-                    color: Colors.green, fontWeight: FontWeight.w500),
+                style:
+                    TextStyle(color: Colors.green, fontWeight: FontWeight.w500),
               ),
             ),
           ),
@@ -156,8 +146,7 @@ class _DeviceDetailView extends StatelessWidget {
 
         Text(
           '${characteristics.length} characteristics across ${grouped.length} services',
-          style: const TextStyle(
-              fontWeight: FontWeight.w500, fontSize: 13),
+          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
         ),
 
         const SizedBox(height: 12),
@@ -179,8 +168,8 @@ class _DeviceDetailView extends StatelessWidget {
                 ),
               ),
               ...entry.value.map((c) => _CharacteristicTile(
-                characteristic: c,
-              )),
+                    characteristic: c,
+                  )),
               const SizedBox(height: 8),
             ],
           );
@@ -194,8 +183,7 @@ class _DeviceDetailView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.bluetooth_disabled,
-              size: 60, color: Colors.grey),
+          const Icon(Icons.bluetooth_disabled, size: 60, color: Colors.grey),
           const SizedBox(height: 16),
           const Text('Disconnected'),
           const SizedBox(height: 16),
@@ -267,8 +255,7 @@ class _CharacteristicTile extends StatelessWidget {
             // Properties
             Row(
               children: [
-                if (characteristic.canRead)
-                  _PropertyChip('READ', Colors.blue),
+                if (characteristic.canRead) _PropertyChip('READ', Colors.blue),
                 if (characteristic.canWrite)
                   _PropertyChip('WRITE', Colors.orange),
                 if (characteristic.canNotify)
