@@ -176,7 +176,7 @@ class _HealthChartState extends State<HealthChart> {
             }).toList();
           },
           touchTooltipData: LineTouchTooltipData(
-            getTooltipColor: (_) => color,
+            tooltipBgColor: color,
             getTooltipItems: (touchedSpots) {
               return touchedSpots.map((spot) {
                 final i = spot.x.toInt();

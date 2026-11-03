@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/animated_number.dart';
 import '../../domain/entities/health_metric.dart';
 
 class MetricCard extends StatefulWidget {
@@ -25,18 +26,17 @@ class MetricCard extends StatefulWidget {
 
 class _MetricCardState extends State<MetricCard>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  String _previousValue = '';
+  late final AnimationController _controller;
+  late final Animation<double> _scale;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 160),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+    _scale = Tween<double>(begin: 1.0, end: 1.03).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
@@ -44,9 +44,11 @@ class _MetricCardState extends State<MetricCard>
   @override
   void didUpdateWidget(MetricCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value != _previousValue) {
-      _previousValue = widget.value;
-      _controller.forward().then((_) => _controller.reverse());
+    // Small "pop" only when the status changes (normal -> warning etc.)
+    if (oldWidget.status != widget.status) {
+      _controller.forward().then((_) {
+        if (mounted) _controller.reverse();
+      });
     }
   }
 
@@ -69,9 +71,15 @@ class _MetricCardState extends State<MetricCard>
 
   @override
   Widget build(BuildContext context) {
+    final numeric = double.tryParse(widget.value) ?? 0;
+    final decimals = widget.value.contains('.')
+        ? widget.value.split('.').last.length
+        : 0;
+
     return ScaleTransition(
-      scale: _scaleAnimation,
-      child: Container(
+      scale: _scale,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
@@ -93,71 +101,48 @@ class _MetricCardState extends State<MetricCard>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icon + status indicator
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
                     color: _statusColor.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(
-                    widget.icon,
-                    color: _statusColor,
-                    size: 20,
-                  ),
+                  child: Icon(widget.icon, color: _statusColor, size: 20),
                 ),
-                if (widget.status != MetricStatus.normal)
-                  Icon(
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 300),
+                  opacity: widget.status == MetricStatus.normal ? 0 : 1,
+                  child: Icon(
                     Icons.warning_amber_rounded,
                     color: _statusColor,
                     size: 16,
                   ),
+                ),
               ],
             ),
-
             const Spacer(),
-
-            // Value
-            TweenAnimationBuilder<double>(
-              tween: Tween(
-                begin: 0,
-                end: double.tryParse(
-                    widget.value.replaceAll(RegExp(r'[^0-9.]'), '')) ??
-                    0,
-              ),
+            AnimatedNumber(
+              value: numeric,
+              decimals: decimals,
               duration: const Duration(milliseconds: 500),
-              curve: Curves.easeOut,
-              builder: (context, value, child) {
-                return Text(
-                  widget.value,
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: _statusColor,
-                    height: 1,
-                  ),
-                );
-              },
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: _statusColor,
+                height: 1,
+              ),
             ),
-
             const SizedBox(height: 2),
-
-            // Unit
             Text(
               widget.unit,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade500,
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
             ),
-
             const SizedBox(height: 4),
-
-            // Label
             Text(
               widget.label,
               style: const TextStyle(

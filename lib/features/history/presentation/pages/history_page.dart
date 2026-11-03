@@ -4,7 +4,9 @@ import '../../../../core/di/bloc_factory.dart';
 import '../bloc/history_bloc.dart';
 import '../bloc/history_event.dart';
 import '../bloc/history_state.dart';
+import '../widgets/chart_skeleton.dart';
 import '../widgets/history_card.dart';
+import '../widgets/staggered_item.dart';
 
 class HistoryPage extends StatelessWidget {
   const HistoryPage({super.key});
@@ -12,8 +14,8 @@ class HistoryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-        create: (_) => BlocFactory.createHistoryBloc()
-          ..add(LoadHistoryEvent()),
+      create: (_) =>
+      BlocFactory.createHistoryBloc()..add(LoadHistoryEvent()),
       child: const _HistoryView(),
     );
   }
@@ -21,6 +23,16 @@ class HistoryPage extends StatelessWidget {
 
 class _HistoryView extends StatelessWidget {
   const _HistoryView();
+
+  Future<void> _refresh(BuildContext context) async {
+    final bloc = context.read<HistoryBloc>();
+    // Subscribe first, then trigger, so we never miss the result
+    final done = bloc.stream.firstWhere(
+          (s) => s is HistoryLoaded || s is HistoryError,
+    );
+    bloc.add(LoadHistoryEvent());
+    await done;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,25 +45,15 @@ class _HistoryView extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => context
-                .read<HistoryBloc>()
-                .add(LoadHistoryEvent()),
+            onPressed: () =>
+                context.read<HistoryBloc>().add(LoadHistoryEvent()),
           ),
         ],
       ),
       body: BlocBuilder<HistoryBloc, HistoryState>(
         builder: (context, state) {
-          if (state is HistoryLoading) {
-            return const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Loading your health history...'),
-                ],
-              ),
-            );
+          if (state is HistoryLoading || state is HistoryInitial) {
+            return const ChartSkeleton();
           }
 
           if (state is HistoryError) {
@@ -59,11 +61,8 @@ class _HistoryView extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 60,
-                    color: Colors.red,
-                  ),
+                  const Icon(Icons.error_outline,
+                      size: 60, color: Colors.red),
                   const SizedBox(height: 16),
                   Text(state.message),
                   const SizedBox(height: 16),
@@ -80,16 +79,16 @@ class _HistoryView extends StatelessWidget {
 
           if (state is HistoryLoaded) {
             return RefreshIndicator(
-              onRefresh: () async {
-                context.read<HistoryBloc>().add(LoadHistoryEvent());
-              },
+              onRefresh: () => _refresh(context),
               child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(16),
                 children: [
-                  // Summary header
-                  _buildSummaryHeader(context),
+                  StaggeredItem(
+                    index: 0,
+                    child: _buildSummaryHeader(),
+                  ),
                   const SizedBox(height: 20),
-
                   const Text(
                     '7-Day Trends',
                     style: TextStyle(
@@ -98,48 +97,39 @@ class _HistoryView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-
-                  // Charts
-                  ...state.histories.map(
-                        (history) => HistoryCard(history: history),
-                  ),
-
+                  for (var i = 0; i < state.histories.length; i++)
+                    StaggeredItem(
+                      index: i + 1,
+                      child: HistoryCard(history: state.histories[i]),
+                    ),
                   const SizedBox(height: 80),
                 ],
               ),
             );
           }
 
-          return const SizedBox();
+          return const SizedBox.shrink();
         },
       ),
     );
   }
 
-  Widget _buildSummaryHeader(BuildContext context) {
+  Widget _buildSummaryHeader() {
+    const green = Color(0xFF00C896);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            const Color(0xFF00C896).withOpacity(0.15),
-            const Color(0xFF00C896).withOpacity(0.05),
-          ],
+          colors: [green.withOpacity(0.15), green.withOpacity(0.05)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFF00C896).withOpacity(0.3),
-        ),
+        border: Border.all(color: green.withOpacity(0.3)),
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.calendar_today,
-            color: Color(0xFF00C896),
-            size: 28,
-          ),
+          const Icon(Icons.calendar_today, color: green, size: 28),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,7 +142,7 @@ class _HistoryView extends StatelessWidget {
                 ),
               ),
               Text(
-                'Tap any chart to see details',
+                'Touch and drag on a chart for details',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey.shade500,
